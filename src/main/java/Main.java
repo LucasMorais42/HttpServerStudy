@@ -19,7 +19,7 @@ public class Main {
             byte[] buffer = new byte[1024];
             System.out.println("Buffer bytes: " + buffer.toString());
             int bytesRead = inputStream.read(buffer);
-            System.out.println("Bytes Readas: " + bytesRead);
+            System.out.println("Bytes Reads: " + bytesRead);
 
 
             if(bytesRead>0){
