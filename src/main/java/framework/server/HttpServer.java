@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HttpServer {
 
@@ -14,10 +16,12 @@ public class HttpServer {
     public void start(int port){
         try(ServerSocket serverSocket = new ServerSocket(port)){
             logger.info("Server running on port: {}", port);
+            ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+
             while(!serverSocket.isClosed()){
                 Socket clientSocket = serverSocket.accept();
-                ClientHandler handler = new ClientHandler(clientSocket);
-                handler.run();
+                pool.submit(new ClientHandler(clientSocket));
+                logger.info("Thread Pool is terminated: {}", pool.isTerminated());
             }
         } catch (IOException e){
             logger.error("Server error {}", e.getMessage());

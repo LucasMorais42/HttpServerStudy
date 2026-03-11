@@ -7,16 +7,16 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 public class Response {
-    private int statusCode; //200, 400, 404
+    private HttpStatus status; //200, 400, 404
     private byte[] responseBodyBytes; //bytes por padrão do navegador
-    private String contentType; //Content-Type: plain-text ou json
+    private ContentType contentType; //Content-Type: plain-text ou json
 
     public void send(OutputStream outputStream) throws IOException {
 
         byte[] actualBody = (responseBodyBytes == null) ? new byte[0] : responseBodyBytes;
         try{
-            outputStream.write(("HTTP/1.1 " + statusCode + " " + getReasonCode(statusCode) + "\r\n").getBytes());
-            outputStream.write(("Content-Type: " + contentType + "\r\n").getBytes());
+            outputStream.write(("HTTP/1.1 " + status.getCode() + " " + status.getStatus() + "\r\n").getBytes());
+            outputStream.write(("Content-Type: " + contentType.getMimeType() + "\r\n").getBytes());
             outputStream.write(("Content-Length: " + actualBody.length + "\r\n").getBytes());
             outputStream.write(("\r\n").getBytes());
             outputStream.write(actualBody);
@@ -26,8 +26,9 @@ public class Response {
         }
     }
 
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
+
+    public void setStatusCode(HttpStatus status) {
+        this.status = status;
     }
 
     public void setResponseBodyBytes(byte[] responseBodyBytes) {
@@ -38,24 +39,10 @@ public class Response {
         this.responseBodyBytes = responseBodyBytes.getBytes();
     }
 
-    public void setContentType(String contentType){
+    public void setContentType(ContentType contentType){
         this.contentType = contentType;
     }
 
-    public int getStatusCode() {
-        return statusCode;
-    }
 
-    private String getReasonCode(int statusCode){
-        return switch (statusCode){
-            case 200 -> "OK";
-            case 201 -> "Created";
-            case 204 -> "No Content";
-            case 400 -> "Bad Request";
-            case 401 -> "Unauthorized";
-            case 403 -> "Forbidden";
-            case 404 -> "Not Found";
-            default ->  "Internal Server Error";
-        };
-    }
+
 }
