@@ -16,7 +16,7 @@ public class HttpServer {
     public void start(int port){
         try(ServerSocket serverSocket = new ServerSocket(port)){
             logger.info("Server running on port: {}", port);
-            ExecutorService pool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+            ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
 
             while(!serverSocket.isClosed()){
                 Socket clientSocket = serverSocket.accept();

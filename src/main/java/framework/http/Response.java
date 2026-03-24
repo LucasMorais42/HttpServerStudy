@@ -20,8 +20,7 @@ public class Response {
             outputStream.write(("Content-Length: " + actualBody.length + "\r\n").getBytes());
             outputStream.write(("\r\n").getBytes());
             outputStream.write(actualBody);
-
-        }catch (Exception e){
+        } catch (Exception e){
             throw new RuntimeException(e);
         }
     }

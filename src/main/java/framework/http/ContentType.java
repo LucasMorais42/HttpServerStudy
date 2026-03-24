@@ -23,6 +23,7 @@ public enum ContentType {
 
     );
 
+
     ContentType(String extension, String mimeType){
         this.extension = extension;
         this.mimeType = mimeType;
@@ -34,7 +35,7 @@ public enum ContentType {
         if(indexOfDot==-1){
             return PLAIN;
         }
-        String pathWithDot = path.substring(indexOfDot);
+        String pathWithDot = path.substring(indexOfDot).toLowerCase();
 
         return EXTENSIONS.getOrDefault(pathWithDot, PLAIN);
     }
