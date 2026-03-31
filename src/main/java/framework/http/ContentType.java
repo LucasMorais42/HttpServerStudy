@@ -9,6 +9,7 @@ public enum ContentType {
     JS(".js", "application/javascript"),
     PNG(".png", "image/png"),
     JPG(".jpg", "image/jpeg"),
+    JSON(".json", "application/json"),
     PLAIN("", "text/plain");
 
     private final String extension;
@@ -19,7 +20,8 @@ public enum ContentType {
             ".css", CSS,
             ".js", JS,
             ".png", PNG,
-            ".jpg", JPG
+            ".jpg", JPG,
+            ".json", JSON
 
     );
 

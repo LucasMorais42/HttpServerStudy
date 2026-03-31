@@ -1,9 +1,6 @@
 package framework.server;
 
-import framework.http.ContentType;
-import framework.http.HttpStatus;
-import framework.http.Request;
-import framework.http.Response;
+import framework.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,64 +18,36 @@ public class ClientHandler implements Runnable{
     private final Socket socket;
 
 
-    public ClientHandler(Socket socket) {
+    private final Router router;
+
+    public ClientHandler(Socket socket, Router router) {
         this.socket = socket;
-    }
-
-    public void handleRequest(BufferedReader reader, OutputStream writer) throws IOException{
-        Request request = new Request(reader);
-        if(!request.isValid()) return;
-       
-
-        String path = request.getPath();
-        if(path.equals("/")){
-            path = "/index.html";
-        }
-
-        Response response = new Response();
-
-        try(InputStream fileStream = getClass().getResourceAsStream(path)){
-            if(fileStream != null){
-                byte[] fileBytes = fileStream.readAllBytes();
-                response.setStatusCode(HttpStatus.OK);
-                response.setContentType(ContentType.fromPath(path));
-                response.setResponseBodyBytes(fileBytes);
-            }
-            else{
-                response.setStatusCode(HttpStatus.NOT_FOUND);
-                response.setContentType(ContentType.HTML);
-                response.setResponseBodyBytes("<h1>404 - File Not Found </h1>");
-            }
-        }
-
-        response.send(writer);
-
-
-    }
-
-    public void sendInternalServerError(OutputStream writer) throws IOException {
-        Response response = new Response();
-        response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-        response.setResponseBodyBytes("<h1>500 - Internal Server Error</h1>");
-        response.setContentType(ContentType.HTML);
-        response.send(writer);
+        this.router = router;
     }
 
     @Override
     public void run() {
 
         try(socket;
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream())))
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            OutputStream writer = socket.getOutputStream();
+        )
         {
+            Request request = new Request(reader);
+            if(!request.isValid()) return;
 
-            handleRequest(reader, socket.getOutputStream());
+            Response response = new Response();
+            boolean handled = router.dispatch(request, response);
+            if(!handled){
+                response.setStatusCode(HttpStatus.NOT_FOUND);
+                response.setResponseBodyBytes("{\"error\": \"Endpoint not found\"}");
+                response.setContentType(ContentType.JSON);
+
+            }
+            response.send(writer);
 
         } catch (Exception e){
-
             logger.error("Client Error: {}", e.getMessage());
-            try{
-                sendInternalServerError(socket.getOutputStream());
-            } catch(IOException ignored){}
 
         }
     }
